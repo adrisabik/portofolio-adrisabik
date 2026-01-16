@@ -248,6 +248,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
                 </div>
             </section>
 
+            <div className="h-20" />
             <Dock />
         </main>
     );
