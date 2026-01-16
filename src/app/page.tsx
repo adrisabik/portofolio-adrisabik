@@ -7,6 +7,7 @@ import { TechStackModule } from '@/components/bento/modules/tech-stack-module';
 import { AvatarModule } from '@/components/bento/modules/avatar-module';
 import { TimelineModule } from '@/components/bento/modules/timeline-module';
 import { ScrollReveal } from '@/components/animation/scroll-reveal';
+import { FeaturedProjectsModule } from '@/components/bento/modules/featured-projects-module';
 
 export default function HomePage() {
   return (
@@ -30,8 +31,8 @@ export default function HomePage() {
             </BentoCard>
 
             {/* Featured Projects Slider - Right (Spans 2 rows) */}
-            <BentoCard colSpan={8} rowSpan={2} className="flex items-center justify-center text-center">
-              <p className="text-muted">Featured Projects Slider<br /><span className="text-xs">(Next Phase)</span></p>
+            <BentoCard colSpan={8} rowSpan={2} className="flex items-center justify-center text-center p-0 overflow-hidden">
+              <FeaturedProjectsModule />
             </BentoCard>
 
             {/* Tech Stack Module - Left Bottom */}

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, Github } from 'lucide-react';
+import { ArrowRight, Github, Linkedin, Mail } from 'lucide-react';
 
 export function HeroModule() {
     return (
@@ -33,6 +33,22 @@ export function HeroModule() {
                 >
                     <Github className="w-4 h-4" />
                     GitHub
+                </a>
+                <a
+                    href="https://www.linkedin.com/in/adrisabik/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 border border-border rounded-xl hover:bg-white/5 transition-colors"
+                >
+                    <Linkedin className="w-4 h-4" />
+                    LinkedIn
+                </a>
+                <a
+                    href="mailto:adrisabik.dev@gmail.com"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 border border-border rounded-xl hover:bg-white/5 transition-colors"
+                >
+                    <Mail className="w-4 h-4" />
+                    Email
                 </a>
             </div>
         </div>

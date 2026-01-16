@@ -5,28 +5,53 @@ import { Briefcase } from 'lucide-react';
 
 const events = [
     {
+        company: 'PT. Dana Purna Investama',
+        role: 'Mobile Developer',
+        period: 'Nov 2025 - Present',
+        type: 'Full Time',
+        color: 'border-accent-green',
+    },
+    {
         company: 'Amanata',
         role: 'Mobile Engineer',
-        period: '2024 - Present',
+        period: 'Aug 2024 - Nov 2025',
+        type: 'Contract',
         color: 'border-accent-blue',
     },
     {
         company: 'Signals99 Studio',
         role: 'Mobile Engineer',
-        period: '2023 - 2024',
+        period: 'Apr 2023 - Aug 2024',
+        type: 'Full-time',
         color: 'border-accent-purple',
     },
     {
         company: 'PT. Time Excelindo',
         role: 'Frontend Developer',
-        period: '2022 - 2023',
+        period: 'Aug 2022 - Jun 2023',
+        type: 'Full-time',
         color: 'border-accent-green',
     },
     {
         company: 'TeDi',
-        role: 'Frontend Developer',
-        period: '2022',
+        role: 'Software Engineer',
+        period: 'Aug 2022 - Dec 2022',
+        type: 'Outsource',
         color: 'border-white/20',
+    },
+    {
+        company: 'PT. Git Solution',
+        role: 'Full Stack Web',
+        period: 'Feb 2022 - Jul 2022',
+        type: 'Internship',
+        color: 'border-orange-500',
+    },
+    {
+        company: 'SIB Dicoding',
+        role: 'FE & Machine Learning',
+        period: 'Aug 2021 - Jan 2022',
+        type: 'Internship',
+        color: 'border-red-500',
     },
 ];
 
@@ -58,7 +83,12 @@ export function TimelineModule() {
                             <div>
                                 <div className="font-semibold text-sm mb-1">{event.company}</div>
                                 <div className="text-xs text-accent-blue mb-1">{event.role}</div>
-                                <div className="text-[10px] text-muted">{event.period}</div>
+                                <div className="flex flex-col gap-0.5">
+                                    <span className="text-[10px] text-muted">{event.period}</span>
+                                    <span className="text-[10px] text-white/40 bg-white/5 px-2 py-0.5 rounded-full mx-auto w-fit">
+                                        {event.type}
+                                    </span>
+                                </div>
                             </div>
                         </motion.div>
                     ))}
