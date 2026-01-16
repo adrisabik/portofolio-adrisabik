@@ -39,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrains.variable}`}>
+    <html lang="en" className={`${inter.variable} ${jetbrains.variable}`} suppressHydrationWarning>
       <body className="antialiased min-h-screen">
         {children}
       </body>
