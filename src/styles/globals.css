@@ -16,22 +16,23 @@
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), monospace;
 
-  /* Custom breakpoints using container queries or utility classes are handled differently in v4, 
-     but we can define them as theme variables if needed. However, standard responsive 
-     modifiers (sm:, md:, lg:, etc) work out of the box. */
+  --breakpoint-mobile: 767px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1280px;
 }
 
 @layer base {
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    antialiased: true;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  
+
   ::selection {
     background-color: color-mix(in srgb, var(--color-accent-purple) 30%, transparent);
   }
@@ -44,7 +45,7 @@
     backdrop-filter: blur(12px);
     border-radius: var(--radius-bento);
   }
-  
+
   .text-gradient {
     background-image: linear-gradient(to right, var(--color-accent-blue), var(--color-accent-purple));
     -webkit-background-clip: text;
