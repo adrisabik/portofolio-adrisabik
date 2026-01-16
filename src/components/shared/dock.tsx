@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Home, Briefcase, BookOpen, User, Mail } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
@@ -15,6 +16,8 @@ const navItems = [
 ];
 
 export function Dock() {
+    const pathname = usePathname();
+
     return (
         <Tooltip.Provider delayDuration={200}>
             <motion.nav
@@ -27,32 +30,37 @@ export function Dock() {
                     'flex items-center gap-1'
                 )}
             >
-                {navItems.map((item) => (
-                    <Tooltip.Root key={item.href}>
-                        <Tooltip.Trigger asChild>
-                            <Link
-                                href={item.href}
-                                className={cn(
-                                    'p-3 rounded-xl transition-colors duration-200',
-                                    'hover:bg-white/10 hover:text-accent-blue',
-                                    'focus:outline-none focus:ring-2 focus:ring-accent-blue/50'
-                                )}
-                            >
-                                <item.icon className="w-5 h-5" />
-                                <span className="sr-only">{item.label}</span>
-                            </Link>
-                        </Tooltip.Trigger>
-                        <Tooltip.Portal>
-                            <Tooltip.Content
-                                className="glassmorphism px-3 py-1.5 text-sm"
-                                sideOffset={8}
-                            >
-                                {item.label}
-                                <Tooltip.Arrow className="fill-surface" />
-                            </Tooltip.Content>
-                        </Tooltip.Portal>
-                    </Tooltip.Root>
-                ))}
+                {navItems.map((item) => {
+                    const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href) && item.href !== '#contact';
+
+                    return (
+                        <Tooltip.Root key={item.href}>
+                            <Tooltip.Trigger asChild>
+                                <Link
+                                    href={item.href}
+                                    className={cn(
+                                        'p-3 rounded-xl transition-colors duration-200',
+                                        'hover:bg-white/10 hover:text-accent-blue',
+                                        'focus:outline-none focus:ring-2 focus:ring-accent-blue/50',
+                                        isActive ? 'bg-white/10 text-accent-blue shadow-[0_0_10px_rgba(59,130,246,0.5)]' : 'text-muted'
+                                    )}
+                                >
+                                    <item.icon className="w-5 h-5" />
+                                    <span className="sr-only">{item.label}</span>
+                                </Link>
+                            </Tooltip.Trigger>
+                            <Tooltip.Portal>
+                                <Tooltip.Content
+                                    className="glassmorphism px-3 py-1.5 text-sm"
+                                    sideOffset={8}
+                                >
+                                    {item.label}
+                                    <Tooltip.Arrow className="fill-surface" />
+                                </Tooltip.Content>
+                            </Tooltip.Portal>
+                        </Tooltip.Root>
+                    );
+                })}
             </motion.nav>
         </Tooltip.Provider>
     );
