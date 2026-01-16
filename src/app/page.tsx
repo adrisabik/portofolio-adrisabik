@@ -48,7 +48,8 @@ export default function HomePage() {
         </ScrollReveal>
       </div>
 
+      <div className="h-20" />
       <Dock />
-    </main>
+    </main >
   );
 }

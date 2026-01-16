@@ -15,8 +15,12 @@ const navItems = [
     { href: '#contact', icon: Mail, label: 'Contact' },
 ];
 
+import { useState } from 'react';
+import { ContactModal } from '@/components/shared/contact-modal';
+
 export function Dock() {
     const pathname = usePathname();
+    const [isContactOpen, setIsContactOpen] = useState(false);
 
     return (
         <Tooltip.Provider delayDuration={200}>
@@ -32,22 +36,38 @@ export function Dock() {
             >
                 {navItems.map((item) => {
                     const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href) && item.href !== '#contact';
+                    const isContact = item.href === '#contact';
 
                     return (
                         <Tooltip.Root key={item.href}>
                             <Tooltip.Trigger asChild>
-                                <Link
-                                    href={item.href}
-                                    className={cn(
-                                        'p-3 rounded-xl transition-colors duration-200',
-                                        'hover:bg-white/10 hover:text-accent-blue',
-                                        'focus:outline-none focus:ring-2 focus:ring-accent-blue/50',
-                                        isActive ? 'bg-white/10 text-accent-blue shadow-[0_0_10px_rgba(59,130,246,0.5)]' : 'text-muted'
-                                    )}
-                                >
-                                    <item.icon className="w-5 h-5" />
-                                    <span className="sr-only">{item.label}</span>
-                                </Link>
+                                {isContact ? (
+                                    <button
+                                        onClick={() => setIsContactOpen(true)}
+                                        className={cn(
+                                            'p-3 rounded-xl transition-colors duration-200',
+                                            'hover:bg-white/10 hover:text-accent-blue',
+                                            'focus:outline-none focus:ring-2 focus:ring-accent-blue/50',
+                                            'text-muted'
+                                        )}
+                                    >
+                                        <item.icon className="w-5 h-5" />
+                                        <span className="sr-only">{item.label}</span>
+                                    </button>
+                                ) : (
+                                    <Link
+                                        href={item.href}
+                                        className={cn(
+                                            'p-3 rounded-xl transition-colors duration-200',
+                                            'hover:bg-white/10 hover:text-accent-blue',
+                                            'focus:outline-none focus:ring-2 focus:ring-accent-blue/50',
+                                            isActive ? 'bg-white/10 text-accent-blue shadow-[0_0_10px_rgba(59,130,246,0.5)]' : 'text-muted'
+                                        )}
+                                    >
+                                        <item.icon className="w-5 h-5" />
+                                        <span className="sr-only">{item.label}</span>
+                                    </Link>
+                                )}
                             </Tooltip.Trigger>
                             <Tooltip.Portal>
                                 <Tooltip.Content
@@ -62,6 +82,8 @@ export function Dock() {
                     );
                 })}
             </motion.nav>
+
+            <ContactModal open={isContactOpen} onOpenChange={setIsContactOpen} />
         </Tooltip.Provider>
     );
 }
