@@ -1,0 +1,57 @@
+---
+slug: offline-first-apps
+title: "Building Offline-First Mobile Apps"
+description: "Strategies and patterns for building mobile apps that work seamlessly without internet connectivity."
+date: 2024-10-05
+tags: ["Flutter", "Offline", "SQLite", "Sync"]
+readingTime: "10 min read"
+---
+
+In a world where we expect constant connectivity, the reality is often spotty 4G, dead zones in elevators, or expensive roaming data. An "Offline-First" app isn't just a nice-to-have features; it's often a requirement for a great user experience. Here is my strategy for building robust offline-capable Flutter apps.
+
+## The Mental Model
+
+Traditional apps treat the Server as the "Source of Truth" and the App as a simple viewer.
+**Offline-First apps treat the Local Database as the primary "Source of Truth" for the UI.**
+
+The flow changes from:
+`UI -> API -> UI`
+to:
+`UI -> Local DB -> UI`
+and in the background:
+`Local DB <-> Sync Engine <-> API`
+
+## Key Components
+
+### 1. Local Storage
+You need a robust local database.
+*   **SQLite (via drift or sqflite):** Great for relational data, complex queries, and stability.
+*   **Hive / Isar:** NoSQL, incredibly fast, and easier to set up for simple data models.
+*   **PowerSync:** An emerging player that handles sync automatically with Postgres.
+
+### 2. Synchronization Strategy
+This is the hardest part. How do you keep local and remote data in sync?
+
+*   **Strategy A: Last Write Wins (easiest):** Just overwrite based on timestamps. Good for simple settings.
+*   **Strategy B: Optimistic UI:** Update the local UI immediately. Send the request to the server. If it fails, roll back the change and notify the user.
+*   **Strategy C: Conflict Resolution:** If two users edit the same record, you need logic (or user intervention) to decide which version to keep.
+
+### 3. Queue System
+When the device is offline, user actions (POST/PUT/DELETE) must be captured in a "Pending Actions Queue".
+*   Persist this queue to disk! If the app crashes, the action shouldn't be lost.
+*   Pattern: Use a `WorkManager` or a custom queue service that listens for connectivity changes (using `connectivity_plus`) to process the queue.
+
+## Practical Implementation Steps
+
+1.  **Repository Logic:** Your repository should always return a Stream from the Local DB.
+2.  **Fetch Logic:** When the repository is called, trigger a "fetch from network" in the background. When data arrives, save it to Local DB. The Stream will automatically update the UI.
+3.  **Write Logic:** Write to Local DB first. Then add a job to the Sync Queue.
+
+## Handling Edge Cases
+
+*   **Pagination:** It gets tricky. Do you paginate from local DB or API? usually, you sync "recent" data and fetch older data on demand.
+*   **File Uploads:** Images need to be stored locally (cached) and queued for upload. You need to handle retries and partial uploads.
+
+## Summary
+
+Building offline-first is expensive. It effectively doubles your data layer complexity. However, the result is an app that feels instant, trustworthy, and usable anywhere. For mission-critical apps (field service, logistics, healthcare), it is absolutely worth the investment.
