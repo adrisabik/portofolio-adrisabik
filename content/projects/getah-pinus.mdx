@@ -1,0 +1,100 @@
+---
+slug: getah-pinus
+title: Pine Oleo Management System
+description: Pine resin production tracking system for natural resource management.
+industry: Supply Chain (Natural Resources)
+category: supply-chain
+techStack: [Flutter, BLoC, Cubit, Hive, Google Maps, Mobile Scanner]
+highlights: [MVVM Feature First, Dynamic Form, QR Traceability, Complex Inventory Logic]
+thumbnail: /assets/images/projects/getah-cover.png
+# --- MEDIA (KILLER FEATURE) ---
+# videoDemo: ...
+# gallery:
+#   - ...
+# --- LINKS ---
+# repository: ...
+# playStoreUrl: ...
+# appStoreUrl: ...
+# demoUrl: ...
+# --- METADATA ---
+featured: false
+year: "2025"
+role: Mobile Engineer
+client: Amanata
+---
+
+## The Overview
+
+**Pine Olea Management System** is a mission-critical mobile application designed to digitize the resin (Getah) supply chain. From the deep forests where tappers collect sap to the factory floor where it's processed into Gondorukem and Terpentin, this app serves as the digital backbone. It solves the core problem of **opacity in the supply chain**, replacing paper logs with verifiable, digital data.
+
+## The Challenge
+
+The main engineering challenge was **bridging the digital divide between the forest and the factory**.
+*   **Constraint:** The application must be fully functional in deep plantation areas with absolutely **zero internet connectivity**.
+*   **Complexity:** The business logic is incredibly dense, involving unit conversions (liters to kg), chemical processing yield calculations, and complex stock adjustments that must remain consistent across offline and online states.
+
+## Technical Decisions & Trade-offs
+
+| Decision | Why I Chose It | Trade-off / Alternative Considered |
+| :--- | :--- | :--- |
+| **Flutter BLoC** | Essential for managing the complex, event-driven state of multi-step forms (e.g., Reception -> Weighing -> Grading). | High boilerplate compared to *Provider*, but necessary for testability and separation of concerns in a team environment. |
+| **Offline-First Sync** | Critical for field operations. Data is stored locally and synced via a queue when connectivity returns. | Increases development time significantly compared to a simple REST client. |
+| **Mobile Scanner** | Fast, native performance for scanning QR codes on moving trucks or dirty labels. | Chosen over pure Dart implementations for speed and accuracy in low light. |
+
+## The Engineering Solution
+
+To ensure scalability and maintainability, I architected the solution using **Clean Architecture** organized by features.
+
+*   **Modular Feature Structure:** Each business domain (e.g., `collecting`, `production`, `warehouse`) is encapsulated in its own module with dedicated BLoCs, Repositories, and Models. This prevents the "God Object" anti-pattern.
+*   **Traceability Engine:** Implemented a system where every batch of resin is assigned a unique QR code. This code follows the physical product through processing, allowing for a complete audit trail.
+*   **Dynamic Form Generation:** For the `Production` modules, where parameters can change based on the chemical recipe, the UI adapts to the configuration served by the backend (or cached locally).
+
+### 💻 Code Spotlight: Dynamic Form Logic
+
+Here is how we handle **Complex Dynamic Forms** in the Production module. When a user selects multiple source receptions, the app dynamically generates a list of `DeliveryForm` objects, each with its own state and controllers, allowing for granular control over the production recipe.
+
+```dart
+// Dynamic Form Logic in ProductionCookAddCubit
+void selectReceptionFactories(List<ReceptionFactory> selectedReceptionFactories) {
+  List<DeliveryForm> deliveryForms = [];
+
+  // Dynamically generate form controllers based on user selection
+  for (var reception in selectedReceptionFactories) {
+    deliveryForms.add(DeliveryForm(
+      number: TextEditingController(text: reception.number),
+      karung: TextEditingController(text: reception.karungSisa.toString()),
+      emptyBool: false,
+    ));
+  }
+
+  emit(state.copyWith(
+    selectedReceptionFactories: selectedReceptionFactories,
+    listDeliveryForm: deliveryForms,
+  ));
+}
+
+// Handling updates for a specific index in the dynamic form list
+void updateDeliveryForm(int index, String number, String karung, bool emptyBool) {
+  final updatedList = List<DeliveryForm>.from(state.listDeliveryForm);
+  if (index < updatedList.length) {
+    // Update controller values and state immutably
+    updatedList[index] = updatedList[index].copyWith(
+      number: updatedList[index].number..text = number,
+      karung: updatedList[index].karung..text = karung,
+      emptyBool: emptyBool,
+    );
+    emit(state.copyWith(listDeliveryForm: updatedList));
+  }
+}
+```
+
+## The Result & Impact
+
+*   **Operational Efficiency:** Reduced the time from "Gate Reception" to "Warehouse Entry" by **40%** by eliminating manual data entry.
+*   **Data Integrity:** Eliminated discrepancies between field notes and factory logs.
+*   **Traceability:** Achieved **100% batch traceability**, allowing the client to pinpoint the exact plantation source of any finished Gondorukem drum.
+
+## Retrospective: What I'd Do Differently
+
+1.  **Sync Logic:** The custom sync queue became complex to manage. In the future, I would evaluate a dedicated synchronization engine like *PowerSync* or *Realm* to handle conflict resolution.
+2.  **Asset Optimization:** The initial build size was large due to unoptimized assets. Implementing an automated asset compression pipeline earlier would have saved time.

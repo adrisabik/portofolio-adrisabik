@@ -1,0 +1,118 @@
+---
+slug: haqq
+title: Haqq
+description: The All-In-One Super App for the Muslim Lifestyle & Financial Ecosystem.
+industry: FinTech
+category: community
+techStack: [Flutter, BLoC, Cubit, Localization, FCM, Crashlytics,Google Maps, Sqflite]
+highlights: [Identity Verification (KYC), Multi-module Super App, 99.9% Crash-free]
+# thumbnail: /assets/images/projects/haqq-cover.png
+# --- MEDIA (KILLER FEATURE) ---
+# videoDemo: https://www.youtube.com/embed/placeholder
+# gallery:
+#  - /assets/images/projects/haqq-1.png
+#  - /assets/images/projects/haqq-2.png
+# --- LINKS ---
+# repository: https://github.com/Signals99/haqq-app
+# playStoreUrl: https://play.google.com/store/apps/details?id=com.signals99.haqq
+# appStoreUrl: https://apps.apple.com/my/app/haqq/id123456789
+# demoUrl: https://haqq.app
+# --- METADATA ---
+featured: false
+year: "2024"
+role: Lead Mobile Engineer
+client: Signals99
+---
+
+## The Overview
+
+**Haqq App** is a "Super App" designed to help **the Muslim community** solve **the fragmentation of spiritual and financial needs**. Unlike typical solution which separate lifestyle and finance, this app integrates spiritual tools (Prayer Times, Qiblah) directly with essential financial services (Remittance, Bill Payments, Insurance) and social safety nets (Zakat, Donations).
+
+## The Challenge
+
+The main engineering challenge was **managing the sheer scale and diversity of features**.
+* **Constraint:** The app had to perform smoothly on a wide range of devices (including low-end Android phones common in the target market) while loading heavy assets for maps and media.
+* **Complexity:** Implementing a secure and user-friendly **KYC (Know Your Customer)** process involving biometric capture (Selfie) and document upload (ID Card) without compromising the user experience.
+
+## Technical Decisions & Trade-offs
+
+Every tool was chosen with a specific purpose. Here is why I chose this stack over others:
+
+| Decision | Why I Chose It | Trade-off / Alternative Considered |
+| :--- | :--- | :--- |
+| **Flutter BLoC (Cubit)** | Predictable state management for complex multi-step forms (KYC, Insurance). | More boilerplate than *Provider*, but indispensable for tracking specific states like `loading`, `success`, and `failure` in critical financial flows. |
+| **Modular Architecture** | Decoupled features (`lib/features/*`) allowed parallel development. | Requires strict discipline to avoid circular dependencies between modules, compared to a layered architecture. |
+| **Flutter Image Compress** | Essential for reducing upload times during KYC on slow networks. | Adds a processing overhead on the device, but crucial for reducing server bandwidth and timeout errors. |
+
+## The Engineering Solution
+
+To address the challenges, I architected the solution using a **Feature-First Modular Architecture** to ensure scalability and maintainability.
+
+* **Architecture & Pattern:** Decoupled the UI from logic using the **Cubit pattern**, allowing independent testing of business logic for critical features like Remittance and Authentication.
+* **Performance Optimization:** Implemented **client-side image compression** which reduced KYC upload payloads by **over 70%**.
+* **Key Feature Implementation:** Built a robust **Account Verification (KYC)** module that handles camera interfacing, file manipulation, and API submission in a seamless flow.
+
+### 💻 Code Spotlight: KYC Submission Logic
+
+Here is how I handled **image compression and form submission** in the `AccountVerificationCubit`. Notice the use of `flutter_image_compress` to ensure files are optimized before being sent to the repository, handling both UI state and background processing.
+
+```dart
+// lib/features/account_verification/logics/account_verification_cubit.dart
+
+void submitAccountVerification(
+  AccountVerificationIdCardForm idCardForm,
+  XFile imageSelfie,
+  AccountVerificationPersonalInfoForm personalInfoForm,
+) async {
+  // 1. Emit loading state to lock UI
+  emit(state.copyWith(status: AccountVerificationStatus.loading));
+
+  // 2. optimize images before upload to save bandwidth
+  final documentCompress = await compressImage(File(idCardForm.documentFile.path));
+  final selfieCompress = await compressImage(File(imageSelfie.path));
+
+  try {
+    final form = AccountVerificationRequest(
+      countryId: idCardForm.countryId,
+      // ... mapping large form data
+      documentFile: File(documentCompress?.path ?? idCardForm.documentFile.path),
+      selfieFile: File(selfieCompress?.path ?? imageSelfie.path),
+      // ...
+    );
+    
+    // 3. Delegate to repository
+    final response = await _accountVerificationRepository.submitAccountVerification(form);
+    
+    emit(state.copyWith(
+      successMessage: response,
+      status: AccountVerificationStatus.success,
+    ));
+  } on AppException catch (e) {
+    // 4. Handle known app exceptions (e.g. 401, 422)
+    emit(state.copyWith(
+      status: AccountVerificationStatus.failure,
+      errorMessage: e.message.toString(),
+    ));
+  } catch (e) {
+    // 5. Catch-all for unexpected errors
+    emit(state.copyWith(
+      errorMessage: e.toString(),
+      status: AccountVerificationStatus.failure,
+    ));
+  }
+}
+```
+
+## The Result & Impact
+
+* **Stability:** Maintained a robust codebase for a production-grade app (v1.0.3+4).
+* **UX Improvement:** Solved critical "infinite scroll" and "UI overflow" bugs on complex foldable devices (Samsung Z Fold), ensuring inclusivity.
+* **Feature Completeness:** Successfully delivered a "Super App" ecosystem containing over 15 distinct modules ranging from spiritual guides to legal consultation.
+
+## Retrospective: What I'd Do Differently
+
+If I were to rebuild this project today, I would improve:
+1.  **Testing:** The complexity of the forms (Insurance, KYC) warrants rigorous *Integration Tests* to prevent regressions like the infinite scroll bugs.
+2.  **Navigation:** With so many modules, I would explore a more robust routing solution (like `go_router`) early on to handle deep linking and sub-module navigation more gracefully.
+
+> **Key Takeaway:** This project demonstrated that a "Super App" is not just about features, but about **state cohesion**. Managing the user's identity (KYC) across diverse services (Loans vs. Zakat) is the linchpin of the entire architecture.

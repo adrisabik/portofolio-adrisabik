@@ -1,0 +1,149 @@
+---
+slug: hcm-pergudangan-pkg
+title: HCM Pergudangan PKG
+description: Human Capital Management system for Petrokimia Gresik warehousing department.
+industry: HRIS / Logistics
+category: enterprise
+techStack: [Flutter, BLoC, Firebase, Google Maps, Mobile Scanner]
+highlights: [Geo-fenced Attendance, Digital HR Workflows, APD Lifecycle Management]
+thumbnail: /assets/images/projects/hcm-cover.png
+# --- MEDIA (KILLER FEATURE) ---
+# videoDemo: ...
+# gallery:
+#   - ...
+# --- LINKS ---
+# repository: ...
+playStoreUrl: https://play.google.com/store/apps/details?id=com.petrokimia.hcm
+# appStoreUrl: ...
+# demoUrl: ...
+# --- METADATA ---
+featured: true
+year: "2024"
+role: Mobile Engineer
+client: Signals99
+---
+
+## The Overview
+
+**HCM Mobile** is an enterprise-grade application designed to digitize the workforce management of large organizations. It moves beyond simple attendance tracking to handle complex workflows like Shift Exchanges, Overtime validations, and the complete lifecycle of **APD (Alat Pelindung Diri / Personal Protective Equipment)**.
+
+## The Challenge
+
+Building an HCM app for a dynamic workforce presents unique challenges:
+*   **Trust vs. Ease:** Balancing the need for strict verification (GPS, Photos) during clock-in without making the process cumbersome for employees in the field.
+*   **Complex Workflows:** Digitizing paper-heavy processes like "Shift Exchange" or "APD Requests" which involve multiple levels of approval and physical handovers.
+*   **Data Integrity:** Ensuring that attendance data is accurate and tamper-proof, even in areas with spotty internet connectivity.
+
+## Technical Decisions & Trade-offs
+
+| Decision | Why I Chose It | Trade-off / Alternative Considered |
+| :--- | :--- | :--- |
+| **Flutter BLoC** | Essential for managing the complex state of multi-step forms (like APD requests or Evaluations). | Higher boilerplate than *Provider*, but necessary for the strict separation of business logic in an enterprise app. |
+| **Mobile Scanner** | Fast, native performance for scanning APD QR codes. | Requires camera permissions and handling device-specific camera quirks. |
+| **Google Maps SDK** | Industry standard for accurate geo-fencing and location validation. | Increases app size and requires API key management. |
+
+## The Engineering Solution
+
+To ensure scalability and maintainability, the app follows a **Feature-First Layered Architecture**.
+
+*   **Modular Features:** Each domain (e.g., `presence`, `apd`, `overtime`) is self-contained in the `lib/features` directory, making it easy for multiple developers (`adrisabik`, `dikynugraha1111`) to work in parallel without conflicts.
+*   **Robust Networking:** A centralized HTTP client with network logging (added in recent updates) ensures that API issues are easily traceable.
+*   **Security:** Sensitive data like tokens are stored using `flutter_secure_storage`, and critical actions like "Emergency Contact" updates are protected by verified sessions.
+
+### 💻 Code Spotlight: Presence Verification
+
+The `PresenceCubit` manages the complex state of real-time location tracking. The code below demonstrates the full initialization logic (`load`), which includes permission checks, fake GPS detection, and the setup of the location stream to validate geofences in real-time.
+
+```dart
+Future<void> load() async {
+  Set<Circle> circles = {};
+  bool isFound = false;
+
+  try {
+    emit(state.copyWith(status: PresenceStatus.loadingInitial));
+    await checkingPermission();
+    final Position locationData =
+        await locationService.getUserCurrentPosition();
+    log('locationData: $locationData');
+    await fakeLocationDetector();
+    log("not Mocked");
+
+    final user = await credentialStorageService.getUser();
+    final presenceTypes = await presenceService.getPresenceTypes();
+
+    emit(state.copyWith(
+      status: PresenceStatus.loaded,
+      user: user,
+      location: locationData,
+      presenceTypes: presenceTypes,
+    ));
+
+    streamSubscription = locationService.locationStream;
+    streamSubscription?.onData((currentLocation) {
+      log("locationStream: ${currentLocation.latitude.toString()}");
+      emit(state.copyWith(status: PresenceStatus.updatingLocation));
+      Circle? position;
+      Area? area;
+
+      for (var e in state.circles) {
+        final distance = Distance.findDistance(
+          LatLng(
+            state.location!.latitude,
+            state.location!.longitude,
+          ),
+          e.center,
+        );
+        isFound = false;
+        if ((distance * 1000) <= e.radius) {
+          position = e;
+          int index = 0;
+          for (var circle in state.circles) {
+            if (circle == position) {
+              area = state.areas![index];
+              isFound = true;
+            }
+            index++;
+          }
+          break;
+        }
+      }
+
+      emit(state.copyWith(
+        status: PresenceStatus.locationUpdated,
+        location: currentLocation,
+        selectedCircle: isFound ? position : null,
+        selectedArea: isFound ? area : null,
+        isInRange: isFound,
+      ));
+    });
+  } on StateError {
+    return;
+  } on TOKENEXPIRED {
+    await authenticationRepository.logout();
+  } on TimeoutException catch (e) {
+    final error = HCMError<PresenceErrorType>(
+      PresenceErrorType.other,
+      message: e.message.toString(),
+    );
+    emit(state.copyWith(
+      status: PresenceStatus.locationDetectionFailure,
+      error: error,
+    ));
+  } catch (exception) {
+    final error = HCMError<PresenceErrorType>(
+      PresenceErrorType.other,
+      message: exception.toString(),
+    );
+    emit(state.copyWith(
+      status: PresenceStatus.locationDetectionFailure,
+      error: error,
+    ));
+  }
+}
+```
+
+## The Result & Impact
+
+*   **Streamlined Operations:** Reduced the time for Shift Exchange approvals from days to minutes.
+*   **Enhanced Safety:** The APD tracking system ensures that no employee is working with expired or unapproved safety gear.
+*   **Reliability:** Continuous bug fixes (as seen in the 2024 logs) regarding input evaluation and calendar logic have resulted in a stable, daily-driver app for the workforce.

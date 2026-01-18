@@ -1,0 +1,80 @@
+---
+slug: minamitra-pelapak
+title: Lapak3M
+description: A comprehensive mobile ecosystem for aquaculture sellers, featuring auctions, capital financing, and digital supply chain management.
+industry: Aquaculture / Fintech
+category: enterprise
+techStack: [Flutter, Firebase, BLoC, Google Maps, Dio]
+highlights: [Multi-step KYC, Real-time Auctions, Capital Financing, QR Payments]
+thumbnail: /assets/images/projects/lapak3m-cover.png
+# --- MEDIA ---
+videoDemo: #
+gallery:
+  - /assets/images/onboard-background.svg
+  - /assets/images/auction-product-image.png
+  - /assets/images/score-background.png
+# --- LINKS ---
+repository: #
+playStoreUrl: #
+appStoreUrl: #
+demoUrl: #
+# --- METADATA ---
+featured: false
+year: "2024"
+role: Mobile Engineer
+client: Amanata
+---
+
+## The Overview
+
+**Minamitra Pelapak** is a specialized application designed to empower aquaculture sellers ("Pelapak"). It bridges the gap between traditional fish farming and modern digital finance. The app allows users to participate in fish auctions, apply for business capital (financing), and manage their supply chain logistics through a unified mobile interface.
+
+## The Challenge
+
+The primary challenge was digitizing a traditionally manual and paper-heavy industry while ensuring trust and ease of use for non-technical users.
+*   **Constraint:** The app needed to handle complex financial data (KYC, Credit Scoring) securely and accurately.
+*   **Complexity:** Implementing a seamless **multi-step bidding system** and a **granular verification flow** (KTP, Selfie, NPWP) required robust state management to prevent data loss during the process.
+
+## Technical Decisions & Trade-offs
+
+| Decision | Why I Chose It | Trade-off / Alternative Considered |
+| :--- | :--- | :--- |
+| **Flutter BLoC (Cubit)** | strict separation of business logic and UI, essential for the complex multi-stage forms (Registration, Auctions). | Higher learning curve than *Provider*, but more maintainable for enterprise-scale features. |
+| **Google Maps SDK** | Accurate location pinning for store verification and distribution routes. | Heavier app size compared to *OpenStreetMap*, but offers superior reliability for logistics. |
+| **Flutter Secure Storage** | To securely persist sensitive auth tokens and user session data. | Slower than *SharedPreferences*, but mandatory for financial security compliance. |
+
+## The Engineering Solution
+
+To ensure scalability, I utilized a **Feature-First Architecture** (visible in the `lib/features` directory structure).
+
+*   **Modular Features:** Each domain (Auction, Capital, Auth) is encapsulated, allowing for independent development and testing.
+*   **Capital Engine:** The **Capital** module is a standout engineering feat. It calculates credit scores, manages bill cycles, and handles limit increase requests dynamically based on user activity.
+*   **Optimized Forms:** The **Registration** and **Auction Bidding** flows utilize a "Wizard" pattern with state persistence, ensuring users don't lose progress if they step away.
+
+### 💻 Code Spotlight: Capital Bill Payment Logic
+
+Handling financial transactions requires precision. Here is a glimpse of how we structure the Capital Bill logic to ensure data integrity.
+
+```dart
+// Conceptual example of the Cubit managing bill state
+class CapitalBillCubit extends Cubit<CapitalBillState> {
+  final CapitalRepository _repository;
+
+  CapitalBillCubit(this._repository) : super(CapitalBillInitial());
+
+  Future<void> fetchBillHistory() async {
+    emit(CapitalBillLoading());
+    final result = await _repository.getBillHistory();
+    result.fold(
+      (failure) => emit(CapitalBillError(failure.message)),
+      (data) => emit(CapitalBillLoaded(data)),
+    );
+  }
+}
+```
+
+## The Result & Impact
+
+*   **Financial Inclusion:** Enabled sellers to access credit limits and increase their purchasing power directly through the app.
+*   **Operational Efficiency:** Reduced manual verification time by digitizing the KYC process with document uploads and location tagging.
+*   **User Engagement:** The simplified Auction interface increased participation rates in daily fish trading.
