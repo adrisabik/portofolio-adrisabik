@@ -4,16 +4,17 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
-import { mockProjects } from '@/data/mock-projects';
+import Image from 'next/image';
+import { projects, type Project } from '@velite';
 
 export function FeaturedProjectsModule() {
-    const featuredProjects = mockProjects.filter((p) => p.featured);
+    const featuredProjects = projects.filter((p: Project) => p.featured);
     const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % featuredProjects.length);
-        }, 10000);
+        }, 5000);
         return () => clearInterval(timer);
     }, [featuredProjects.length]);
 
@@ -51,17 +52,16 @@ export function FeaturedProjectsModule() {
                             {/* Image or Placeholder */}
                             {currentProject.thumbnail ? (
                                 <div className="relative w-full h-full">
-                                    <img
+                                    <Image
                                         src={currentProject.thumbnail}
                                         alt={currentProject.title}
-                                        className="object-cover w-full h-full"
+                                        fill
+                                        className="object-cover"
                                     />
-                                    {/* Overlay gradient for text readability if needed, though design has text on right */}
                                 </div>
                             ) : (
-                                <div className="text-center">
-                                    <span className="text-4xl">📱</span>
-                                    <p className="text-xs text-muted mt-2">App Screenshot</p>
+                                <div className="w-full h-full bg-gradient-to-br from-white/5 to-white/10 flex items-center justify-center">
+                                    <span className="text-6xl">✨</span>
                                 </div>
                             )}
                         </motion.div>
@@ -97,17 +97,17 @@ export function FeaturedProjectsModule() {
                                     <span className="text-xs text-muted font-mono">{currentProject.year}</span>
                                 </div>
 
-                                <h3 className="text-2xl md:text-3xl font-bold mb-2 leading-tight">
+                                <h3 className="text-2xl md:text-3xl font-bold mb-2 leading-tight text-left">
                                     {currentProject.title}
                                 </h3>
 
-                                <p className="text-muted text-sm md:text-base line-clamp-3 mb-6">
+                                <p className="text-muted text-sm md:text-base line-clamp-3 mb-6 text-left">
                                     {currentProject.description}
                                 </p>
 
-                                <div className="flex flex-wrap gap-2 mb-6">
-                                    {currentProject.techStack.slice(0, 3).map((tech) => (
-                                        <span key={tech} className="text-xs font-mono px-2 py-1 bg-white/5 rounded">
+                                <div className="flex flex-wrap gap-2 mb-6 max-h-[56px] overflow-hidden">
+                                    {currentProject.techStack.map((tech) => (
+                                        <span key={tech} className="text-xs font-mono px-2 py-1 bg-white/5 rounded shrink-0">
                                             {tech}
                                         </span>
                                     ))}
