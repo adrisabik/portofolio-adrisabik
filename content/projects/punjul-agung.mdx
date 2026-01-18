@@ -1,0 +1,99 @@
+---
+slug: punjul-agung
+title: Punjul Agung
+description: Smart village management suite and local e-commerce platform.
+industry: Government / E-Commerce
+category: community
+techStack: [Flutter, Bloc, Hive, Maps, Syncfusion Charts]
+highlights: [MVVM Feature First, Offline First, Interactive Stats, Village Marketplace]
+thumbnail: /assets/images/projects/punjul-agung-cover.png
+# --- MEDIA (KILLER FEATURE) ---
+# videoDemo: ...
+# gallery:
+#   - ...
+# --- LINKS ---
+# repository: ...
+# playStoreUrl: ...
+# appStoreUrl: ...
+# demoUrl: ...
+# --- METADATA ---
+featured: false
+year: "2024"
+role: Mobile Engineer
+client: Amanata
+---
+
+## The Overview
+
+**Desa Punjul Agung App** is a mobile solution designed to digitalize the village ecosystem. It serves as a bridge between the village government and its residents, offering features ranging from administrative services to a digital marketplace for local products. Uniquely, it addresses the challenge of rural connectivity by prioritizing an **Offline-First** experience.
+
+## The Challenge
+
+The main engineering challenge was ensuring reliable access to information in an area with unstable internet connectivity.
+*   **Constraint:** The app must be fully functional for reading news, checking stats, and viewing products even when the user is offline.
+*   **Complexity:** Synchronizing local data with the server and managing state transitions between "Online" and "Offline" modes seamlessly.
+
+## Technical Decisions & Trade-offs
+
+Every tool was chosen to ensure stability and performance on a wide range of devices.
+
+| Decision | Why I Chose It | Trade-off / Alternative Considered |
+| :--- | :--- | :--- |
+| **Flutter BLoC (Cubit)** | strict separation of business logic and UI, essential for the complex offline/online state switching. | Higher boilerplate than *Provider*, but necessary for testability and scale. |
+| **Hive (NoSQL)** | Blazing fast read/write for caching JSON responses directly. | Less query power than *SQLite*, but faster for simple document storage/retrieval. |
+| **Syncfusion Charts** | Professional-grade visualization for village statistics. | Adds to bundle size, but offers superior interactivity compared to building custom painters. |
+
+## The Engineering Solution
+
+To address the connectivity issues, I architected the solution using **Clean Architecture** with a dedicated **Local Data Source** strategy.
+
+*   **Architecture & Pattern:** Feature-based Clean Architecture. Each feature (e.g., News, Product) has its own repository that decides whether to fetch from the Network or Hive based on the `ConnectivityCubit`.
+*   **Performance Optimization:** Aggressive caching of API responses using Hive. Images are cached using `cached_network_image`.
+*   **Key Feature Implementation:** The **Statistics Module** dynamically renders demographic data using interactive charts, making complex village data easy to understand for everyone.
+
+### 💻 Code Spotlight: Offline-First Repository
+
+Here is the actual implementation of the **NewsRepository**, which handles the data decision logic. It attempts to fetch fresh data from the API when online and caches it. If offline or if the API call fails, it gracefully falls back to the local Hive database.
+
+```dart
+// lib/features/news/repositories/news_repository.dart
+
+  @override
+  Future<List<News>> getNews({
+    required bool isOnline,
+    String categoryId = '',
+    String search = '',
+  }) async {
+    if (isOnline) {
+      try {
+        final response = await service.getAllNews(
+          categoryId: categoryId,
+          search: search,
+        );
+        List<News> newsList = response.data;
+        await local.cacheNews(newsList); // Cache for offline use
+        return newsList;
+      } catch (e) {
+        // Fallback to cache if server fails
+        return local.getCachedNews();
+      }
+    } else {
+      // Direct offline access
+      return local.getCachedNews();
+    }
+  }
+```
+
+## The Result & Impact
+
+*   **Reliability:** Residents can access critical announcements 24/7, regardless of signal strength.
+*   **Engagement:** The local marketplace (Produk Desa) feature has given local artisans a digital storefront.
+*   **Transparency:** Visualized statistics provide clear insights into village demographics and transparency.
+
+## Retrospective: What I'd Do Differently
+
+If I were to rebuild this project today, I would improve:
+1.  **Background Sync:** Implement a background worker (WorkManager) to sync data silently when connection is restored, rather than waiting for the user to open the app.
+2.  **Granular Caching:** Instead of caching entire responses, I would normalize data to update specific fields efficiently.
+
+> **Key Takeaway:** Building for rural contexts requires a fundamental shift in thinking—connectivity cannot be assumed. The "Offline-First" approach is not just a feature; it's a necessity for inclusion.

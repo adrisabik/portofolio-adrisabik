@@ -29,6 +29,10 @@
 
   body {
     background-color: var(--color-background);
+    background-image:
+      radial-gradient(circle at 15% 0%, color-mix(in srgb, var(--color-accent-purple) 15%, transparent) 0%, transparent 50%),
+      radial-gradient(circle at 85% 100%, color-mix(in srgb, var(--color-accent-blue) 15%, transparent) 0%, transparent 50%);
+    background-attachment: fixed;
     color: var(--color-foreground);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

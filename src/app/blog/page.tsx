@@ -5,12 +5,15 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Search } from 'lucide-react';
 import { Dock } from '@/components/shared/dock';
-import { mockBlogPosts } from '@/data/mock-blog-posts';
+import { blogs, type Blog } from '@velite';
 
 export default function BlogPage() {
     const [searchQuery, setSearchQuery] = useState('');
 
-    const filteredPosts = mockBlogPosts.filter(
+    // Sort blogs by date descending
+    const sortedBlogs = [...blogs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    const filteredPosts = sortedBlogs.filter(
         (post) =>
             post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             post.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -48,14 +51,20 @@ export default function BlogPage() {
                         >
                             <Link href={`/blog/${post.slug}`} className="block glassmorphism p-6 hover:border-accent-blue/50 transition-colors">
                                 <div className="flex items-center gap-4 text-sm text-muted mb-2">
-                                    <time>{post.date}</time>
+                                    <time dateTime={post.date}>
+                                        {new Date(post.date).toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                        })}
+                                    </time>
                                     <span>•</span>
                                     <span>{post.readingTime}</span>
                                 </div>
                                 <h2 className="text-xl font-semibold mb-2 hover:text-accent-blue transition-colors">
                                     {post.title}
                                 </h2>
-                                <p className="text-muted line-clamp-2">{post.excerpt}</p>
+                                <p className="text-muted line-clamp-2">{post.description}</p>
                                 <div className="flex flex-wrap gap-2 mt-4">
                                     {post.tags.map((tag) => (
                                         <span key={tag} className="px-2 py-1 text-xs bg-white/5 rounded">

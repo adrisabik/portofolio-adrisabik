@@ -1,0 +1,56 @@
+---
+slug: bloc-vs-riverpod
+title: "Bloc vs Riverpod: Which State Management to Choose?"
+description: "A comprehensive comparison of the two most popular state management solutions in Flutter."
+date: 2024-11-20
+tags: ["Flutter", "State Management", "Bloc", "Riverpod"]
+readingTime: "6 min read"
+---
+
+The debate between BLoC (Business Logic Component) and Riverpod is one of the most common topics in the Flutter community. Having used both extensively in production, I want to break down the differences, pros, and cons to help you decide which one fits your project.
+
+## The Contenders
+
+### BLoC (by Felix Angelov)
+BLoC is a mature, battle-tested library based on streams. It enforces a strict unidirectional data flow: **Events In, States Out**.
+*   **Philosophy:** Strict separation of business logic from UI.
+*   **Mechanism:** Relies heavily on Dart Streams.
+
+### Riverpod (by Remi Rousselet)
+Riverpod is a rewrite of Provider, designed to solve its limitations (like compile-time safety and dependency injection).
+*   **Philosophy:** A reactive caching and data-binding framework.
+*   **Mechanism:** Does not rely on the widget tree (unlike Provider), making it more testable and composable.
+
+## Comparison Points
+
+### 1. Boilerplate
+*   **BLoC:** Traditionally known for high boilerplate (Events, States, Bloc files). Although `cubit` reduces this significantly, it's still more verbose than Riverpod.
+*   **Riverpod:** Very concise. Defining a provider is often just one line of code.
+
+### 2. Learning Curve
+*   **BLoC:** High initially. You need to understand Streams, sinks, and the event-state pattern effectively.
+*   **Riverpod:** Moderate. The concept of global providers that aren't *actually* global can be confusing at first, along with the variety of providers (StateProvider, FutureProvider, NotifierProvider, etc.).
+
+### 3. Testing
+*   **BLoC:** Excellent. Since BLoCs are just classes interacting with streams, they are incredibly easy to unit test using `bloc_test`.
+*   **Riverpod:** Also excellent, but different. You override providers in your test scope.
+
+### 4. Dependency Injection
+*   **BLoC:** Usually paired with `get_it` or Project for DI.
+*   **Riverpod:** Is a Dependency Injection system itself. This is a huge plus—you don't need another package for DI.
+
+## When to Use Which?
+
+**Choose BLoC if:**
+*   You work in a large enterprise team. BLoC's strictness is an asset here—it forces everyone to code in the same way.
+*   You need complex event transformations (e.g., debounce search inputs) which are trivial with RxDart + BLoC.
+*   You prefer an imperative style of "do this on this event".
+
+**Choose Riverpod if:**
+*   You want less boilerplate and faster development velocity.
+*   You want a unified solution for State Management + Dependency Injection + Data Fetching (Riverpod basically replaces Dio + GetIt + Provider).
+*   You prefer a more declarative, functional style.
+
+## My Personal Verdict
+
+For most new projects in 2024, **Riverpod** is my default choice. The productivity gains are undeniable. However, for legacy enterprise codebases or scenarios requiring complex stream manipulation, **BLoC** remains the king.

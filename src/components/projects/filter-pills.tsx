@@ -9,6 +9,7 @@ const categories: { value: ProjectCategory; label: string }[] = [
     { value: 'community', label: 'Community/Religion' },
     { value: 'supply-chain', label: 'Supply Chain' },
     { value: 'accessibility', label: 'Accessibility' },
+    { value: 'productivity', label: 'Productivity' },
     { value: 'lab', label: 'Lab/Showcase' },
 ];
 

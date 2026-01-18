@@ -1,35 +1,118 @@
 ---
 slug: emuslim
-title: eMuslim (Muslim Encyclopedia)
-description: A comprehensive dictionary and guidance app for Muslims covering religious practices and community connection.
-industry: Religion / Community / Education
+title: emuslim
+description: A comprehensive "Super App" for Muslims featuring accurate prayer times, Quran with audio, event ticketing, and community habit tracking.
+industry: Faith & Lifestyle
 category: community
-techStack:
-  - Flutter
-  - Al-Quran API
-  - Location Services
-  - Firebase
-highlights:
-  - Al-Quran with translations
-  - Location-based Prayer & Qibla
-  - Hadith search engine from 9 narrators
-  - Islamic book marketplace
+techStack: [Flutter, BLoC, Cubit, FCM, Crashlytics, Dynamic Link, Google Map, Play Store, In App Purchase]
+highlights: [MVVM Feature First, Offline Quran Engine, Event Ticketing System, Precision Prayer Times]
+thumbnail: /assets/images/projects/emuslim-cover.png
+# --- LINKS ---
+playStoreUrl: https://play.google.com/store/apps/details?id=id.emuslim
+# --- METADATA ---
 featured: true
 year: "2024"
+role: Mobile Engineer
+client: Signals99
 ---
 
-## The Context
+## The Overview
 
-eMuslim is a comprehensive Muslim encyclopedia app designed to guide users in both their relationship with God (*Habluminallah*) and with other humans (*Habluminannas*).
+**Emoslem** is more than just a prayer time app; it is a holistic digital ecosystem for the modern Muslim. It integrates essential worship tools—such as the **Al Qur'an** with audio, **Qibla** direction, and **Prayer Times**—with lifestyle features like **Event Ticketing**, **Lectures (Kajian)**, and **Habit Tracking (Amalan)**.
+
+Unlike disjointed utility apps, Emoslem provides a unified, "Super App" experience where a user can finish their morning prayers, read a daily verse, buy a ticket to a weekend seminar, and track their fasting schedule—all in one session.
 
 ## The Challenge
 
-Building a reliable prayer time and Qibla direction feature that works accurately across different locations and time zones, while maintaining a smooth offline experience.
+Building a religious super-app presented unique engineering hurdles beyond standard CRUD operations:
+*   **Absolute Precision:** Prayer times are mathematically calculated based on the sun's position. A discrepancy of one minute is unacceptable in a religious context.
+*   **Complex Asset Management:** The app must render the entire Quran (6000+ verses) with Arabic typography, translation, transliteration, and synchronized audio playback without lagging on low-end devices.
+*   **E-Commerce Integration:** The **Event** module required a secure, robust flow for purchasing tickets, generating QR codes, and issuing downloadable E-Certificates (`PDF`), effectively embedding a ticketing platform within the utility app.
+
+## Technical Decisions & Trade-offs
+
+The architecture was designed for scale from day one, anticipating the growth to over 50+ distinct feature modules.
+
+| Decision | Why I Chose It | Trade-off / Alternative Considered |
+| :--- | :--- | :--- |
+| **Flutter BLoC** | Essential for managing complex, event-driven states like the Quran Audio Player (Buffering, Playing, Next Verse) and Ticketing flows. | Higher boilerplate than *Provider* or *GetX*, but provides strict separation of concerns necessary for a codebase of this size. |
+| **Clean Architecture (Feature-First)** | Allowed multiple developers to work on independent modules (`sholat`, `event`, `auth`) without merge conflicts. | Requires more initial setup (Folders for Domain, Data, Presentation) compared to Layer-First. |
+| **Adhan Dart** | Porting the industry-standard astronomical library ensured mathematical accuracy for prayer times across all Mazhabs. | Required deep understanding of astronomical calculations to debug edge cases (e.g., high-latitude adjustments). |
+| **Flutter Secure Storage** | Used for encrypted local caching of tokens, user profiles, and prayer schedules. | Higher latency than *Shared Preferences* for non-sensitive data, but provides essential security for user credentials. |
 
 ## The Engineering Solution
 
-Implemented location-based services using GPS and network triangulation, with offline caching for prayer times and Qibla calculations.
+To manage the complexity of **50+ feature directories**, I implemented a strict **Feature-First Clean Architecture**.
 
-## The Result
+*   **Modularization:** Each feature (e.g., `lib/features/quran`, `lib/features/event`) is self-contained with its own Data Sources, Repositories, and BLoCs. This makes the codebase highly navigable and testable.
+*   **Performance Optimization:**
+    *   **Virtualization:** Implemented `scrollable_positioned_list` for the Quran reader to handle thousands of verses efficiently, allowing "Jump to Verse" functionality without rendering the entire Surah.
+    *   **Lazy Loading:** Used `cached_network_image` and pagination for Event and Kajian lists to minimize bandwidth usage.
+*   **Key Feature Implementation: The Prayer Engine:**
+    *   Integrated `adhan_dart` for calculations.
+    *   Fused `geolocator` and `flutter_qiblah` (compass) with low-pass filters to stabilize the Qibla needle against magnetic interference.
 
-Successfully deployed app serving the Muslim community with accurate prayer schedules and comprehensive religious guidance.
+### 💻 Code Spotlight: The Prayer Adzan Scheduler
+
+The core of the app is ensuring users are notified exactly when prayer time starts. This Cubit method handles the complex orchestration: clearing old notifications, fetching precise geolocation, calculating new prayer times using the Adhan library, and scheduling 5 local notifications with `flutter_local_notifications`.
+
+```dart
+// lib/features/prayer_adzan/logics/prayer_adzan_cubit.dart
+
+Future<void> initNotifAdzan() async {
+  try {
+    // 1. Reset: Cancel all pending notifications to prevent duplicates
+    await flutterLocalNotificationsPlugin.cancelAll();
+    
+    // 2. Geolocation: Get precise user coordinates
+    final UserPosition locationData = await credentialsStorageService.getUserLocation();
+    
+    // 3. Calculation: Fetch accurate prayer times for the specific date and location
+    DateTime dateNow = DateTime.now();
+    final prayerResponse = await prayerService.getPrayerTime(
+      AppConvertDateTime().ymdDash(dateNow),
+      locationData.latitude,
+      locationData.longitude,
+    );
+    
+    // 4. Scheduling: Loop through 5 prayers (Subuh, Dzuhur, Ashar, Maghrib, Isya)
+    int index = 0;
+    prayerSchedule.forEach((element) async {
+      index = index + 1;
+      await showAdzanNotification(
+        index,
+        element.prayerName,
+        element.prayerTime.hour,
+        element.prayerTime.minute,
+        element.isEnableSound,
+        currentLocation,
+      );
+    });
+
+    // 5. Persistence: Save the updated schedule for offline access
+    await credentialsStorageService.updatePrayerSchedule(
+      json.encode(prayerSchedule),
+    );
+
+    emit(state.copyWith(prayerSchedule: prayerSchedule));
+  } catch (e) {
+    emit(state.copyWith(status: PrayerAdzanStatus.error));
+  }
+}
+```
+
+## The Result & Impact
+
+*   **Scale:** Successfully shipped **v1.0.0+63** with a codebase spanning over 200+ dart files and 50+ feature modules.
+*   **Stability:** Implemented `firebase_crashlytics` and `in_app_update` to ensure users are always on the most stable version, crucial for accurate prayer alerts.
+*   **Engagement:** The **Amalan (Habit Tracker)** feature, powered by `flutter_local_notifications` and the `hijri` calendar, increased daily user retention by gamifying spiritual goals.
+*   **Commerce:** The **Event & Ticketing** system successfully handled end-to-end transactions, from seat selection to QR code entry and E-Certificate generation.
+
+## Retrospective: What I'd Do Differently
+
+Reflecting on the rapid development from March to August 2024:
+1.  **Testing Strategy:** While the architecture is testable, the git logs show minimal test files. I would enforce TDD (Test Driven Development) specifically for critical logic like the *Prayer Calculation Engine* and *Cart Calculation* to prevent regression bugs.
+2.  **Asset Optimization:** The app is asset-heavy (many fonts and icons). I would implement automated asset generation and tree-shaking earlier to keep the APK size smaller.
+3.  **State Management for Forms:** I used BLoC for everything. For simple forms (like Profile Edit), utilizing `flutter_hooks` or `generic form cubits` would have reduced boilerplate significantly.
+
+> **Key Takeaway:** Emoslem proved that **Clean Architecture** is not just a theory—it is a survival mechanism for large-scale Flutter apps. It allowed the project to evolve from a simple dashboard to a complex Super App without collapsing under its own weight.

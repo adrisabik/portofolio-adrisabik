@@ -9,7 +9,7 @@ export function HeroModule() {
                     Adri Sabik Muhana
                 </h1>
                 <p className="text-xl text-accent-blue font-medium mb-4">
-                    Senior Mobile Engineer
+                    Mobile Engineer
                 </p>
                 <p className="text-muted leading-relaxed">
                     Building high-performance mobile applications with Flutter and Clean Architecture.

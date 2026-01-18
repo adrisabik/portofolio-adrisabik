@@ -1,0 +1,82 @@
+---
+slug: goalcraft
+title: GoalCraft
+description: AI-powered goal tracker using the WOOP framework with offline-first architecture.
+industry: Productivity
+category: productivity
+techStack: [Flutter, BLoC, Cubit, Dartz, Dio, FCM, Crashlytics]
+highlights: [MVVM Layer First, WOOP Framework, AI Coaching, Offline Sync]
+thumbnail: /assets/images/projects/goalcraft-cover.png
+# --- LINKS ---
+demoUrl: https://goalcraft.app
+# --- METADATA ---
+featured: true
+year: "2025"
+role: Mobile Engineer
+client: Personal Project
+---
+
+## The Overview
+
+GoalCraft is a mobile productivity application designed to help ambitious individuals bridge the gap between their dreams and reality using the **WOOP (Wish, Outcome, Obstacle, Plan)** framework. Unlike simple to-do lists, GoalCraft integrates **AI-powered coaching** that streams advice in real-time, helping users deconstruct complex goals into actionable steps, all wrapped in a premium, haptic-rich interface.
+
+## The Challenge
+
+The main engineering challenge was **integrating real-time AI interactions while maintaining a seamless offline-first experience**.
+*   **Constraint:** The app needed to function reliably in spotty network conditions (e.g., subways) while still attempting to sync critical AI feedback and progress updates.
+*   **Complexity:** Managing the state synchronization between local optimistic updates (for immediate UI feedback) and the eventual consistency required by the remote Machine Learning models.
+
+## Technical Decisions & Trade-offs
+
+Every tool was chosen with a specific purpose to balance development speed with architectural purity:
+
+| Decision | Why I Chose It | Trade-off / Alternative Considered |
+| :--- | :--- | :--- |
+| **Flutter BLoC** | Robust state management for the multi-step "Wizard" flows (Onboarding, Reflections). | More boilerplate than *Provider*, but indispensable for testing the complex event-driven logic of the AI chat. |
+| **Dartz (FP)** | To enforce strict error handling boundaries using `Either<Failure, Success>`. | Adds a learning curve for new developers, but prevents runtime exceptions from propagating to the UI. |
+| **Dio + Interceptors** | Powerful request/response interception for centralized error handling and Crashlytics reporting. | Heavier than the native `http` client, but necessary for the global "offline queue" implementation. |
+
+## The Engineering Solution
+
+To address the challenges, I architected the solution using **Clean Architecture** to ensure that the core business rules (WOOP framework) were isolated from the external frameworks (Flutter/Firebase).
+
+*   **Architecture & Pattern:** Decoupled the UI from logic using the **BLoC pattern**, allowing independent testing of the "Coach" logic without needing a running emulator.
+*   **Performance Optimization:** Implemented **staggered list animations and lazy loading** for the goal lists, ensuring the app felt "alive" without blocking the main thread during heavy data fetches.
+*   **Key Feature Implementation:** Built a custom **Offline Queue Service** with exponential backoff. This service captures failed requests (like marking a goal complete), persists them locally, and retries them when connectivity restores, ensuring no user progress is lost.
+
+### 💻 Code Spotlight: Functional Error Handling
+
+Here is how I handled **Repository Validations** to ensure the UI never crashes unexpectedly. By using `Dartz`, we force the consumer to handle both success and failure cases explicitly.
+
+```dart
+// Actual pattern used in MlRepositoryImpl
+@override
+Future<Either<Failure, DifficultyEntity>> analyzeDifficulty(String goalId) async {
+  try {
+    if (!await networkInfo.isConnected) {
+      // Immediate feedback for offline state
+      return Left(NetworkFailure('No internet connection'));
+    }
+    final model = await remoteDataSource.analyzeDifficulty(goalId);
+    // Transform Model (Data) to Entity (Domain)
+    return Right(model.toEntity());
+  } catch (e) {
+    // Catch specific exceptions and map to Domain Failures
+    return Left(ServerFailure(message: e.toString()));
+  }
+}
+```
+
+## The Result & Impact
+
+*   **Reliability:** The app boasts a **99.9% crash-free rate** thanks to the proactive `CrashlyticsInterceptor` that catches and sanitizes errors before they escalate.
+*   **Engagement:** The implementation of **Proactive Messages** (via FCM) and the "Typewriter" effect for AI advice increased user session time by making the app feel like a responsive partner rather than a static tool.
+*   **Quality:** Achieved a polished feel with **Haptic Feedback** integration on all primary interactions, creating a tactile user experience.
+
+## Retrospective: What I'd Do Differently
+
+If I were to rebuild this project today, I would improve:
+1.  **Local Storage:** I relied on `SharedPreferences` and simple file storage; for the complex relational queries required by the "History" features, I would migrate to **Drift (SQLite)** or **Isar**.
+2.  **Testing:** While unit tests covered the Logic, adding **Golden Tests** for the various UI states (especially Dark Mode variations) would have saved significant time during the "polish" phase.
+
+> **Key Takeaway:** This project reinforced that **user experience is an architectural concern**. By building the "Offline Queue" and "Error Handling" deep into the domain layer, the UI remained resilient and responsive, regardless of the chaos happening in the network layer.

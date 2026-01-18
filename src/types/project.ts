@@ -3,19 +3,27 @@ export interface Project {
     title: string;
     description: string;
     industry: string;
-    category: 'enterprise' | 'supply-chain' | 'community' | 'accessibility' | 'lab';
+    category: 'mobile-app' | 'web-app' | 'enterprise' | 'supply-chain' | 'community' | 'accessibility' | 'lab' | 'productivity';
     techStack: string[];
     highlights: string[];
     thumbnail?: string;
-    playStoreUrl?: string;
+    videoDemo?: string | null; // New
+    gallery?: string[] | null; // New
+    repository?: string | null; // New
+    playStoreUrl?: string | null;
+    appStoreUrl?: string | null; // New
+    demoUrl?: string | null; // New
     featured: boolean;
     year: string;
-    company?: string;
+    role?: string | null; // New
+    client?: string | null; // New (renamed from company)
+    company?: string | null; // Legacy
     context?: string;
     challenge?: string;
     solution?: string;
     results?: string[];
-    images?: string[];
+    images?: string[]; // Legacy?
+    content: string;
 }
 
 export type ProjectCategory = Project['category'] | 'all';

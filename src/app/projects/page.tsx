@@ -5,15 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FilterPills } from '@/components/projects/filter-pills';
 import { ProjectCard } from '@/components/projects/project-card';
 import { Dock } from '@/components/shared/dock';
-import type { Project, ProjectCategory } from '@/types/project';
-
-import { mockProjects } from '@/data/mock-projects';
+import type { ProjectCategory } from '@/types/project';
+import { projects, type Project } from '@velite';
 
 export default function ProjectsPage() {
     const [activeCategory, setActiveCategory] = useState<ProjectCategory>('all');
 
-    const filteredProjects = mockProjects.filter(
-        (project) => activeCategory === 'all' || project.category === activeCategory
+    const filteredProjects = projects.filter(
+        (project: Project) => activeCategory === 'all' || project.category === activeCategory
     );
 
     return (
