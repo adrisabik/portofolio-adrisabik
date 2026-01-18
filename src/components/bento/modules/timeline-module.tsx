@@ -8,7 +8,7 @@ const events = [
         company: 'PT. Dana Purna Investama',
         role: 'Mobile Developer',
         period: 'Nov 2025 - Present',
-        type: 'Full Time',
+        type: 'Full-time',
         color: 'border-accent-green',
     },
     {
