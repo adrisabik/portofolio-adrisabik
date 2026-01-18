@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
     title: 'CV / Resume',
-    description: 'Professional experience and qualifications of Adri Sabik Muhana, Senior Mobile Engineer.',
+    description: 'Professional experience and qualifications of Adri Sabik Muhana, Mobile Engineer.',
 };
 
 export default function CVPage() {
@@ -15,7 +15,7 @@ export default function CVPage() {
                 <header className="flex flex-col md:flex-row md:items-center md:justify-between mb-12 gap-4">
                     <div>
                         <h1 className="text-4xl font-bold mb-2">Adri Sabik Muhana</h1>
-                        <p className="text-xl text-accent-blue">Senior Mobile Engineer</p>
+                        <p className="text-xl text-accent-blue">Mobile Engineer</p>
                     </div>
                     <a
                         href="/assets/CV_AdriSabikMuhana_MobileEngineer.pdf"
@@ -179,7 +179,7 @@ export default function CVPage() {
                     </h2>
                     <div className="border-l-2 border-accent-green pl-4">
                         <h3 className="font-medium">Bachelor of Informatics</h3>
-                        <p className="text-sm text-accent-green">UPN "Veteran" Yogyakarta</p>
+                        <p className="text-sm text-accent-green">UPN &quot;Veteran&quot; Yogyakarta</p>
                         <p className="text-sm text-muted">Sep 2019 - Sep 2025</p>
                         <p className="text-sm text-muted">GPA: 3.35/4.0</p>
                     </div>
