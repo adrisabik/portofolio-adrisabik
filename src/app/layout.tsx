@@ -16,7 +16,7 @@ const jetbrains = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Adri Sabik Muhana | Senior Mobile Engineer',
+    default: 'Adri Sabik Muhana | Mobile Engineer',
     template: '%s | Adri Sabik Muhana',
   },
   description: 'Portfolio showcasing 15+ delivered projects and 5+ published apps. Expertise in Flutter, Clean Architecture, and Mobile Engineering.',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://adrisabik.dev',
     siteName: 'Adri Sabik Muhana Portfolio',
-    title: 'Adri Sabik Muhana | Senior Mobile Engineer',
+    title: 'Adri Sabik Muhana | Mobile Engineer',
     description: 'Portfolio showcasing 15+ delivered projects and 5+ published apps.',
     images: ['/assets/og/default.png'],
   },
