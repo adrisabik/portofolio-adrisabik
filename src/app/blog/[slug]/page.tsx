@@ -1,16 +1,41 @@
-'use client';
-
-import { useParams, notFound } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Clock, Calendar } from 'lucide-react';
 import { Dock } from '@/components/shared/dock';
-import { mockBlogPosts } from '@/data/mock-blog-posts';
-import { use } from 'react';
-import ReactMarkdown from 'react-markdown';
+import { blogs, type Blog } from '@velite';
+import { MDXContent } from '@/components/shared/mdx-content';
+import type { Metadata } from 'next';
 
-export default function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-    const unwrappedParams = use(params);
-    const post = mockBlogPosts.find((p) => p.slug === unwrappedParams.slug);
+// Enable static generation for all blog pages
+export function generateStaticParams() {
+    return blogs.map((post: Blog) => ({
+        slug: post.slug,
+    }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const post = blogs.find((p: Blog) => p.slug === slug);
+
+    if (!post) {
+        return { title: 'Article Not Found' };
+    }
+
+    return {
+        title: post.title,
+        description: post.description,
+        openGraph: {
+            title: post.title,
+            description: post.description,
+            type: 'article',
+            publishedTime: post.date,
+        },
+    };
+}
+
+export default async function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
+    const post = blogs.find((p: Blog) => p.slug === slug);
 
     if (!post) {
         notFound();
@@ -33,7 +58,13 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                     <div className="flex flex-wrap items-center gap-4 text-sm text-muted mb-4">
                         <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4" />
-                            <time>{post.date}</time>
+                            <time dateTime={post.date}>
+                                {new Date(post.date).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                })}
+                            </time>
                         </div>
                         <div className="flex items-center gap-2">
                             <Clock className="w-4 h-4" />
@@ -52,9 +83,9 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
 
                 {/* Content */}
                 <div className="glassmorphism p-6 my-8">
-                    <article className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-p:text-muted prose-li:text-muted prose-strong:text-white prose-code:text-accent-blue">
-                        <ReactMarkdown>{post.content || ''}</ReactMarkdown>
-                    </article>
+                    <div className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-p:text-muted prose-li:text-muted prose-strong:text-white prose-code:text-accent-blue">
+                        <MDXContent code={post.content} />
+                    </div>
                 </div>
             </article>
 
