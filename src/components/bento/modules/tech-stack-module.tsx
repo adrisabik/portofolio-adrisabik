@@ -1,9 +1,10 @@
+
 import Image from 'next/image';
 
 const techStack = [
-    { name: 'Flutter', icon: '/assets/images/tech-icons/flutter.svg' },
-    { name: 'Dart', icon: '/assets/images/tech-icons/dart.svg' },
-    { name: 'Firebase', icon: '/assets/images/tech-icons/firebase.svg' },
+    { name: 'Flutter', icon: '/assets/images/tech-icons/ic_flutter.svg' },
+    { name: 'Dart', icon: '/assets/images/tech-icons/ic_dart.svg' },
+    { name: 'Firebase', icon: '/assets/images/tech-icons/ic_firebase.svg' },
 ];
 
 export function TechStackModule() {
@@ -16,13 +17,18 @@ export function TechStackModule() {
                 {techStack.map((tech) => (
                     <div
                         key={tech.name}
-                        className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-white/5 transition-colors"
+                        className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-white/5 transition-colors group"
                     >
-                        {/* Placeholder until actual icons are added */}
-                        <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center text-xs font-mono">
-                            {tech.name.slice(0, 2)}
+                        <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center p-2 group-hover:bg-white/10 transition-colors">
+                            <Image
+                                src={tech.icon}
+                                alt={tech.name}
+                                width={32}
+                                height={32}
+                                className="w-full h-full object-contain"
+                            />
                         </div>
-                        <span className="text-xs text-muted">{tech.name}</span>
+                        <span className="text-xs text-muted font-medium">{tech.name}</span>
                     </div>
                 ))}
             </div>
