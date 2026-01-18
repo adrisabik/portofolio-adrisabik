@@ -12,10 +12,10 @@ interface ContactModalProps {
 
 const contactLinks = [
     {
-        href: 'mailto:adrisabik@example.com',
+        href: 'mailto:adrisabik@gmail.com',
         icon: Mail,
         label: 'Email',
-        description: 'adrisabik@example.com'
+        description: 'adrisabik@gmail.com'
     },
     {
         href: 'https://linkedin.com/in/adrisabik',
