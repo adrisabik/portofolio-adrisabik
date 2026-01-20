@@ -12,8 +12,7 @@ export function HeroModule() {
                     Mobile Engineer
                 </p>
                 <p className="text-muted leading-relaxed">
-                    Building high-performance mobile applications with Flutter and Clean Architecture.
-                    Passionate about creating seamless user experiences and scalable solutions.
+                    Mobile Engineer focused on engineering excellence and technical precision. I collaborate across the full software lifecycle to build seamless, user-centric solutions to real-world problems.
                 </p>
             </div>
 
