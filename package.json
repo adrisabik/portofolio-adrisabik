@@ -10,6 +10,7 @@
     "velite": "velite"
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tooltip": "^1.2.8",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/next-pwa": "^5.6.9",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -34,6 +36,7 @@
     "eslint-config-next": "16.1.2",
     "rehype-pretty-code": "^0.14.1",
     "remark-gfm": "^4.0.1",
+    "sharp": "^0.34.5",
     "shiki": "^3.21.0",
     "tailwindcss": "^4",
     "typescript": "^5",
