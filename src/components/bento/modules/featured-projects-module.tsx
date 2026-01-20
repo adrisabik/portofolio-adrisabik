@@ -39,15 +39,15 @@ export function FeaturedProjectsModule() {
             <div className="flex flex-col md:flex-row w-full h-full relative z-10">
 
                 {/* Left: Visual Mockup Area */}
-                <div className="w-full md:w-1/2 h-48 md:h-full relative flex items-center justify-center p-6 bg-white/5 border-r border-white/5">
+                <div className="w-full md:w-1/2 h-48 md:h-full relative flex items-center justify-center bg-white/5 border-r border-white/5 overflow-hidden">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={currentProject.slug}
-                            initial={{ opacity: 0, scale: 0.9 }}
+                            initial={{ opacity: 0, scale: 1.1 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{ duration: 0.4 }}
-                            className="w-full h-full bg-gradient-to-tr from-surface to-background rounded-2xl border border-white/10 shadow-2xl flex items-center justify-center"
+                            exit={{ opacity: 0, scale: 1.1 }}
+                            transition={{ duration: 0.6, ease: "easeOut" }}
+                            className="w-full h-full relative"
                         >
                             {/* Image or Placeholder */}
                             {currentProject.thumbnail ? (

@@ -5,10 +5,10 @@ description: AI-powered goal tracker using the WOOP framework with offline-first
 industry: Productivity
 category: productivity
 techStack: [Flutter, BLoC, Cubit, Dartz, Dio, FCM, Crashlytics]
-highlights: [MVVM Layer First, WOOP Framework, AI Coaching, Offline Sync]
+highlights: [MVVM Layer First, WOOP Framework, AI Coaching, Chatbot, Offline First]
 thumbnail: /assets/images/projects/goalcraft-cover.png
 # --- LINKS ---
-demoUrl: https://goalcraft.app
+demoUrl: https://appdistribution.firebase.dev/i/e0134aed664ba237
 # --- METADATA ---
 featured: true
 year: "2025"
@@ -44,26 +44,53 @@ To address the challenges, I architected the solution using **Clean Architecture
 *   **Performance Optimization:** Implemented **staggered list animations and lazy loading** for the goal lists, ensuring the app felt "alive" without blocking the main thread during heavy data fetches.
 *   **Key Feature Implementation:** Built a custom **Offline Queue Service** with exponential backoff. This service captures failed requests (like marking a goal complete), persists them locally, and retries them when connectivity restores, ensuring no user progress is lost.
 
-### 💻 Code Spotlight: Functional Error Handling
+### 💻 Code Spotlight: Optimistic UI Updates
 
-Here is how I handled **Repository Validations** to ensure the UI never crashes unexpectedly. By using `Dartz`, we force the consumer to handle both success and failure cases explicitly.
+To deliver a snappy experience during AI interactions, I implemented **Optimistic UI Updates** within the BLoC pattern. The `ChatCubit` immediately emits a new state with the user's message before the network request completes, ensuring the interface remains responsive even on slower connections.
 
 ```dart
-// Actual pattern used in MlRepositoryImpl
-@override
-Future<Either<Failure, DifficultyEntity>> analyzeDifficulty(String goalId) async {
-  try {
-    if (!await networkInfo.isConnected) {
-      // Immediate feedback for offline state
-      return Left(NetworkFailure('No internet connection'));
-    }
-    final model = await remoteDataSource.analyzeDifficulty(goalId);
-    // Transform Model (Data) to Entity (Domain)
-    return Right(model.toEntity());
-  } catch (e) {
-    // Catch specific exceptions and map to Domain Failures
-    return Left(ServerFailure(message: e.toString()));
-  }
+Future<void> sendMessage(String content) async {
+  final currentState = state;
+  if (currentState is! ChatLoaded) return;
+
+  // 1. Create optimistic user message
+  final userMessage = MessageEntity(
+    id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+    content: content,
+    role: MessageRole.user,
+    status: MessageStatus.sending,
+  );
+
+  // 2. Optimistically update UI immediately
+  final stateWithMessage = currentState.copyWithNewMessage(userMessage);
+  emit(stateWithMessage);
+  emit(stateWithMessage.copyWithTyping(true));
+
+  // 3. Perform network request
+  final result = await _coachRepository.sendMessage(
+    ChatRequest(
+      message: content,
+      conversationId: _currentConversationId,
+    )
+  );
+
+  result.fold(
+    (failure) {
+      // 4. Handle Failure: Mark message as error and stop typing
+      final updatedState = stateWithMessage
+          .copyWithUpdatedMessage(userMessage.id ?? '', MessageStatus.error)
+          .copyWithTyping(false);
+      emit(updatedState);
+    },
+    (response) {
+      // 5. Handle Success: Append AI response
+      emit(ChatLoaded(
+        conversationId: response.conversationId,
+        messages: [...stateWithMessage.messages, response.toEntity()],
+        isTyping: false,
+      ));
+    },
+  );
 }
 ```
 

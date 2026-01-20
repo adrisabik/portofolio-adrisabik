@@ -144,6 +144,20 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                                 </div>
                             </div>
 
+                            {project.highlights && project.highlights.length > 0 && (
+                                <div>
+                                    <h3 className="text-sm font-semibold text-muted uppercase tracking-wider mb-2">Highlights</h3>
+                                    <ul className="space-y-2">
+                                        {project.highlights.map((highlight: string) => (
+                                            <li key={highlight} className="flex items-start gap-2 text-sm text-muted">
+                                                <span className="text-accent-blue mt-0.5">▹</span>
+                                                {highlight}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
 
                             <div className="flex flex-col gap-3 pt-4">
                                 {project.playStoreUrl && (
