@@ -37,7 +37,7 @@ const projects = defineCollection({
         results: s.array(s.string()).optional(),
         content: s.mdx(),
     }),
-    transform: (data: any) => ({
+    transform: (data: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
         ...data,
         // Map company to client if client is missing, for backward compatibility during migration
         client: data.client || data.company,

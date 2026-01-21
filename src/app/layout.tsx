@@ -22,6 +22,14 @@ export const metadata: Metadata = {
   description: 'Portfolio showcasing 15+ delivered projects and 5+ published apps. Expertise in Flutter, Clean Architecture, and Mobile Engineering.',
   keywords: ['Mobile Engineer', 'Flutter Developer', 'Portfolio', 'Adri Sabik Muhana'],
   authors: [{ name: 'Adri Sabik Muhana' }],
+  manifest: '/manifest.json',
+  themeColor: '#0a0a0a',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    viewportFit: 'cover',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -33,6 +41,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { OfflineBanner } from '@/components/ui/offline-banner';
+
 export default function RootLayout({
   children,
 }: {
@@ -41,6 +51,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${jetbrains.variable}`} suppressHydrationWarning>
       <body className="antialiased min-h-screen">
+        <OfflineBanner />
         {children}
       </body>
     </html>
