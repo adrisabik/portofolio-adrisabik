@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"velite dev\" \"next dev --webpack\"",
-    "build": "velite build && next build",
+    "build": "velite build && next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "velite": "velite"
